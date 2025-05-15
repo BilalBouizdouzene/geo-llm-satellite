@@ -1,0 +1,14 @@
+numpy
+pandas
+rasterio
+scikit-learn
+torch
+torchvision
+matplotlib
+opencv-python
+tqdm
+albumentations
+segmentation-models-pytorch
+transformers
+gradio
+streamlit

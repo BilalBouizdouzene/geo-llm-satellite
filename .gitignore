@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+*.pt
+*.pkl
+*.log
+data/processed/
+models/checkpoints/
+.env
