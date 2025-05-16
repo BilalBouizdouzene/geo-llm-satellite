@@ -9,5 +9,3 @@ transform = transforms.Compose([
 
 dataset = ImageFolder(root="data/raw/classification", transform=transform)
 dataloader = DataLoader(dataset, batch_size=32, shuffle=True)
-
-print(dataset.classes)  # ['cloudy', 'desert', 'green_area', 'water']
