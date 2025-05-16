@@ -12,3 +12,4 @@ segmentation-models-pytorch
 transformers
 gradio
 streamlit
+
