@@ -1,30 +1,43 @@
-from torchvision import datasets, transforms
-from torch.utils.data import DataLoader
+import os
+from PIL import Image
+from pathlib import Path
+from tqdm import tqdm
+import shutil
 
-# Transformations appliquées à chaque image
-transform = transforms.Compose([
-    transforms.Resize((224, 224)),        # Redimensionne les images
-    transforms.ToTensor(),                # Convertit en tenseur
-    transforms.Normalize(                 # Normalisation (ImageNet)
-        mean=[0.485, 0.456, 0.406], 
-        std=[0.229, 0.224, 0.225]
-    )
-])
+# Configuration
+RAW_DATA_DIR = Path("data/raw/classefication")
+PROCESSED_DATA_DIR = Path("data/processed/classification")
+TARGET_SIZE = (224, 224)  # Taille standard pour les CNN
 
-# Chargement du dataset
-dataset = datasets.ImageFolder('emplacement', transform=transform)
+def preprocess_and_save_images():
+    if not RAW_DATA_DIR.exists():
+        print(f"Erreur : {RAW_DATA_DIR} n'existe pas.")
+        return
 
-# Division en train / val / test
-from torch.utils.data import random_split
+    print(f"Prétraitement des images depuis {RAW_DATA_DIR}...")
 
-total_size = len(dataset)
-train_size = int(0.7 * total_size)
-val_size = int(0.2 * total_size)
-test_size = total_size - train_size - val_size
+    # Supprimer les anciennes données si elles existent
+    if PROCESSED_DATA_DIR.exists():
+        shutil.rmtree(PROCESSED_DATA_DIR)
 
-train_ds, val_ds, test_ds = random_split(dataset, [train_size, val_size, test_size])
+    # Parcours des classes
+    for class_dir in RAW_DATA_DIR.iterdir():
+        if class_dir.is_dir():
+            class_name = class_dir.name
+            output_class_dir = PROCESSED_DATA_DIR / class_name
+            output_class_dir.mkdir(parents=True, exist_ok=True)
 
-# DataLoaders
-train_loader = DataLoader(train_ds, batch_size=32, shuffle=True)
-val_loader = DataLoader(val_ds, batch_size=32, shuffle=False)
-test_loader = DataLoader(test_ds, batch_size=32, shuffle=False)
+            # Parcours des images
+            for img_path in tqdm(list(class_dir.glob("*.jpg")), desc=f"Traitement de {class_name}"):
+                try:
+                    with Image.open(img_path) as img:
+                        img = img.convert("RGB")  # Assure-toi que l'image est en RGB
+                        img = img.resize(TARGET_SIZE)
+                        img.save(output_class_dir / img_path.name)
+                except Exception as e:
+                    print(f"Erreur sur {img_path.name} : {e}")
+
+    print(f"Images traitées enregistrées dans {PROCESSED_DATA_DIR}")
+
+if __name__ == "__main__":
+    preprocess_and_save_images()
